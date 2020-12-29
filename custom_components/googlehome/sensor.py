@@ -105,7 +105,7 @@ class GoogleHomeAlarm(Entity):
         
         next_alarm = min(alarms[self._condition], key=lambda x: x["fire_time"])
         
-        time_date = dt_util.utc_from_timestamp(next_alarm["firetime"] / 1000)
+        time_date = dt_util.utc_from_timestamp(next_alarm["fire_time"] / 1000)
         self._state = time_date.isoformat()
         self._attributes['status'] = next_alarm["status"]
 
