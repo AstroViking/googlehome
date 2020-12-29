@@ -85,6 +85,8 @@ class GoogleHomeAlarm(Entity):
         self._name = "{} {}".format(name, SENSOR_TYPES[self._condition])
         self._unique_id = cloud_device_id + '_' + condition
         self._connected = True
+        self._attributes = {}
+        self._attributes['status'] = None
 
     async def async_update(self):
         """Update the data."""
@@ -100,10 +102,12 @@ class GoogleHomeAlarm(Entity):
             return
 
         self._available = True
-        time_date = dt_util.utc_from_timestamp(
-            min(element["fire_time"] for element in alarms[self._condition]) / 1000
-        )
+        
+        next_alarm = min(alarms[self._condition], key=lambda x: x["fire_time"])
+        
+        time_date = dt_util.utc_from_timestamp(next_alarm["firetime"] / 1000)
         self._state = time_date.isoformat()
+        self._attributes['status'] = next_alarm["status"]
 
     @property
     def state(self):
@@ -149,6 +153,11 @@ class GoogleHomeAlarm(Entity):
     def icon(self):
         """Return the icon."""
         return ICON
+    
+    @property
+    def device_state_attributes(self):
+        """Return the attributes of the sensor."""
+        return self._attributes
 
     def new_connection_status(self, connection_status):
         if connection_status == CONNECTION_STATUS_CONNECTED:
